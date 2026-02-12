@@ -1,0 +1,69 @@
+-- 1. Total Revenue
+SELECT SUM(Price_USD) AS Total_Revenue
+FROM bmw;
+
+-- 2. Average BMW Value
+SELECT SUM(Price_USD) / COUNT(Model) AS AVG_Car_Price
+FROM bmw;
+
+-- 3. Total BMW’s sold
+SELECT SUM(Sales_Volume) AS Total_Sales_Volume
+FROM bmw;
+
+-- 4. Total BMW’s sold per region
+SELECT Region, SUM(Sales_Volume) AS Total_Sales_Volume
+FROM bmw
+GROUP BY Region;
+
+-- 5. Best selling model per region (by Revenue)
+SELECT Region, Model, Total_Revenue
+FROM (
+    SELECT Region, Model,                
+    SUM(Sales_Volume * Price_USD) AS Total_Revenue,
+    RANK() OVER (PARTITION BY Region ORDER BY SUM(Sales_Volume * Price_USD) DESC) AS rnk
+    FROM bmw
+    GROUP BY Region, Model
+) ranked
+WHERE rnk = 1
+ORDER BY Region;
+
+-- 6. Trend: Annual Sales from 2010 - 2024
+SELECT Year AS Year, SUM(Sales_Volume) AS Annual_Sales
+FROM bmw
+GROUP BY Year
+ORDER BY Year DESC;
+
+-- 7. Trend: Total Sales based on Color
+SELECT Color, SUM(Sales_Volume) AS Total_Sales
+FROM bmw
+GROUP BY Color
+ORDER BY Total_Sales DESC;
+
+-- 8. Percentage of Sales by car color
+SELECT Color, ROUND(SUM(Sales_Volume) * 100 / (SELECT sum(Sales_Volume) FROM bmw), 1) AS Total_Sales
+FROM bmw
+GROUP BY Color;
+
+-- 9. Percentage of Sales by Region
+SELECT Region, ROUND(SUM(Sales_Volume) * 100 / (SELECT sum(Sales_Volume) FROM bmw), 1) AS Total_Sales
+FROM bmw
+GROUP BY Region;
+
+-- 10. Total Cars sold by Transmission type
+SELECT Transmission, SUM(Sales_Volume) AS Total_Sales
+FROM bmw
+GROUP BY Transmission;
+
+-- 11. Top 5 best sellers by Revenue
+SELECT Model, SUM(Sales_Volume * Price_USD) AS Total_Revenue
+FROM bmw
+GROUP BY Model
+ORDER BY Total_Revenue DESC
+LIMIT 5;
+
+-- 12. Bottom 5 sellers by Revenue
+SELECT Model, SUM(Sales_Volume * Price_USD) AS Total_Revenue
+FROM bmw
+GROUP BY Model
+ORDER BY Total_Revenue ASC
+LIMIT 5;
